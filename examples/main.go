@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"time"
 
 	kafkaclient "github.com/uber-go/kafka-client"
 	"github.com/uber-go/kafka-client/kafka"
@@ -25,12 +26,12 @@ func process(msg kafka.Message) error {
 func main() {
 	// mapping from cluster name to list of broker ip addresses
 	brokers := map[string][]string{
-		"sample_cluster":     []string{"127.0.0.1:9092"},
-		"sample_dlq_cluster": []string{"127.0.0.1:9092"},
+		"sample_cluster":     []string{"127.0.0.1:9092", "127.0.0.1:9093", "127.0.0.1:9094"},
+		"sample_dlq_cluster": []string{"127.0.0.1:9092", "127.0.0.1:9093", "127.0.0.1:9094"},
 	}
 	// mapping from topic name to cluster that has that topic
 	topicClusterAssignment := map[string][]string{
-		"sample_topic": []string{"sample_cluster"},
+		"sample_topic_5": []string{"sample_cluster"},
 	}
 
 	// First create the kafkaclient, its the entry point for creating consumers or producers
@@ -42,16 +43,22 @@ func main() {
 		TopicList: kafka.ConsumerTopicList{
 			kafka.ConsumerTopic{ // Consumer Topic is a combination of topic + dead-letter-queue
 				Topic: kafka.Topic{ // Each topic is a tuple of (name, clusterName)
-					Name:    "sample_topic",
+					Name:    "sample_topic_5",
 					Cluster: "sample_cluster",
 				},
 				DLQ: kafka.Topic{
-					Name:    "sample_consumer_dlq",
+					Name:    "sample_consumer_dlq_5",
 					Cluster: "sample_dlq_cluster",
 				},
+				RetryQ: kafka.Topic{
+					Name:    "sample_consumer_retry_5",
+					Cluster: "sample_dlq_cluster",
+					Delay:   time.Microsecond,
+				},
+				MaxRetries: 2,
 			},
 		},
-		GroupName:   "sample_consumer",
+		GroupName:   "sample_consumer_5",
 		Concurrency: 100, // number of go routines processing messages in parallel
 	}
 	// config.Offsets.Initial.Offset = kafka.OffsetOldest
@@ -70,7 +77,7 @@ func main() {
 	}
 
 	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt)
+	signal.Notify(sigCh, os.Interrupt, os.Kill)
 
 	for {
 		select {
@@ -78,10 +85,11 @@ func main() {
 			if !ok {
 				return // channel closed
 			}
-			fmt.Println(string(msg.Value()))
 			if err := process(msg); err != nil {
+				fmt.Println("error:", string(msg.Key()), string(msg.Value()))
 				msg.Nack()
 			} else {
+				fmt.Println("success:", string(msg.Key()), string(msg.Value()))
 				msg.Ack()
 			}
 		case <-sigCh:
