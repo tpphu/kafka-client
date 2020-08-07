@@ -17,7 +17,7 @@ var i = 0
 
 func process(msg kafka.Message) error {
 	i++
-	if i%3 == 0 {
+	if i%3 == 0 || i%4 == 0 {
 		return errors.New("oops!")
 	}
 	return nil
@@ -55,7 +55,7 @@ func main() {
 					Cluster: "sample_dlq_cluster",
 					Delay:   time.Microsecond,
 				},
-				MaxRetries: 2,
+				MaxRetries: 1,
 			},
 		},
 		GroupName:   "sample_consumer_5",
