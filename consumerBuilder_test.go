@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	"github.com/bsm/sarama-cluster"
+	cluster "github.com/bsm/sarama-cluster"
 	"github.com/stretchr/testify/suite"
 	"github.com/uber-go/kafka-client/internal/consumer"
 	"github.com/uber-go/kafka-client/kafka"

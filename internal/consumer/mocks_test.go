@@ -284,6 +284,17 @@ func (m *mockPartitionedConsumer) Partition() int32 {
 	return m.id
 }
 
+// Partition returns the consumed partition
+func (m *mockPartitionedConsumer) InitialOffset() int64 {
+	return m.beginOffset
+}
+
+func (m *mockPartitionedConsumer) MarkOffset(offset int64, metadata string) {
+}
+
+func (m *mockPartitionedConsumer) ResetOffset(offset int64, metadata string) {
+}
+
 func newMockSaramaConsumer() *mockSaramaConsumer {
 	return &mockSaramaConsumer{
 		errorC:     make(chan error, 1),
@@ -455,4 +466,21 @@ func (m *mockSaramaClient) Close() error {
 
 func (m *mockSaramaClient) Closed() bool {
 	return atomic.LoadInt32(&m.closed) > 0
+}
+
+func (m *mockSaramaClient) any() *sarama.Broker {
+	return nil
+}
+
+func (m *mockSaramaClient) InitProducerID() (*sarama.InitProducerIDResponse, error) {
+	var err error
+	return nil, err
+}
+
+func (client *mockSaramaClient) OfflineReplicas(topic string, partitionID int32) ([]int32, error) {
+	return nil, nil
+}
+
+func (client *mockSaramaClient) RefreshController() (*sarama.Broker, error) {
+	return nil, nil
 }
