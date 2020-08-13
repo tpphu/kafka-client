@@ -22,13 +22,10 @@ package consumer
 
 import (
 	"errors"
-	"fmt"
-	"strconv"
 	"sync"
 	"time"
 
 	cluster "github.com/bsm/sarama-cluster"
-	"github.com/uber-go/kafka-client/internal/metrics"
 	"github.com/uber-go/kafka-client/internal/util"
 	"github.com/uber-go/kafka-client/kafka"
 	"github.com/uber-go/tally"
@@ -126,30 +123,30 @@ func (c *ClusterConsumer) Closed() <-chan struct{} {
 
 // eventLoop is the main event loop for this consumer
 func (c *ClusterConsumer) eventLoop() {
-	var n *cluster.Notification
-	var ok bool
+	// var n *cluster.Notification
+	// var ok bool
 	for {
 		select {
 		case pc, ok := <-c.consumer.Partitions():
 			if ok {
 				c.addPartitionConsumer(pc)
 			}
-		case n, ok = <-c.consumer.Notifications():
-			if ok {
-				c.handleNotification(n)
-			}
+		// case _, ok := <-c.consumer.Notifications():
+		// 	if ok {
+		// 		// c.handleNotification(n)
+		// 	}
 		case err, ok := <-c.consumer.Errors():
 			if ok {
 				c.logger.Warn("cluster consumer error", zap.Error(err))
 			}
-		case _, ok := <-c.metricsTicker.C:
-			if ok && n != nil {
-				for topic, partitions := range n.Current {
-					for _, partition := range partitions {
-						c.scope.Tagged(map[string]string{"topic": topic, "partition": strconv.Itoa(int(partition))}).Gauge(metrics.KafkaPartitionOwned).Update(1.0)
-					}
-				}
-			}
+		// case _, ok := <-c.metricsTicker.C:
+		// 	if ok && n != nil {
+		// 		for topic, partitions := range n.Current {
+		// 			for _, partition := range partitions {
+		// 				c.scope.Tagged(map[string]string{"topic": topic, "partition": strconv.Itoa(int(partition))}).Gauge(metrics.KafkaPartitionOwned).Update(1.0)
+		// 			}
+		// 		}
+		// 	}
 		case <-c.stopC:
 			c.shutdown()
 			c.logger.Info("cluster consumer stopped")
@@ -173,29 +170,29 @@ func (c *ClusterConsumer) addPartitionConsumer(pc cluster.PartitionConsumer) {
 // handleNotification is the handler that handles notifications
 // from the underlying library about partition rebalances. There
 // is no action taken in this handler except for logging.
-func (c *ClusterConsumer) handleNotification(n *cluster.Notification) {
-	for topic, partitions := range n.Claimed {
-		for _, partition := range partitions {
-			c.logger.Debug("cluster consumer partition rebalance claimed", zap.String("topic", topic), zap.Int32("partition", partition))
-		}
-	}
+// func (c *ClusterConsumer) handleNotification(n *cluster.Notification) {
+// 	for topic, partitions := range n.Claimed {
+// 		for _, partition := range partitions {
+// 			c.logger.Debug("cluster consumer partition rebalance claimed", zap.String("topic", topic), zap.Int32("partition", partition))
+// 		}
+// 	}
 
-	for topic, partitions := range n.Released {
-		for _, partition := range partitions {
-			c.logger.Debug("cluster consumer partition rebalance released", zap.String("topic", topic), zap.Int32("partition", partition))
-		}
-	}
+// 	for topic, partitions := range n.Released {
+// 		for _, partition := range partitions {
+// 			c.logger.Debug("cluster consumer partition rebalance released", zap.String("topic", topic), zap.Int32("partition", partition))
+// 		}
+// 	}
 
-	var current []string
-	for topic, partitions := range n.Current {
-		for _, partition := range partitions {
-			current = append(current, fmt.Sprintf("%s-%s", topic, strconv.Itoa(int(partition))))
-		}
-	}
+// 	var current []string
+// 	for topic, partitions := range n.Current {
+// 		for _, partition := range partitions {
+// 			current = append(current, fmt.Sprintf("%s-%s", topic, strconv.Itoa(int(partition))))
+// 		}
+// 	}
 
-	c.logger.Info("cluster consumer owned topic-partitions after rebalance", zap.Strings("topic-partitions", current))
-	c.scope.Counter(metrics.KafkaPartitionRebalance).Inc(1)
-}
+// 	c.logger.Info("cluster consumer owned topic-partitions after rebalance", zap.Strings("topic-partitions", current))
+// 	c.scope.Counter(metrics.KafkaPartitionRebalance).Inc(1)
+// }
 
 // shutdown stops the consumer and frees resources
 func (c *ClusterConsumer) shutdown() {

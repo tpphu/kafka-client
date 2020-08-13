@@ -354,7 +354,7 @@ func buildSaramaConfig(options *consumer.Options) *cluster.Config {
 	config.Config.Producer.Flush.Frequency = 1 * time.Second
 	config.ChannelBufferSize = options.PartitionRcvBufferSize
 	config.Group.Mode = options.ConsumerMode
-	config.Group.Return.Notifications = true
+	// config.Group.Return.Notifications = true
 	config.Group.Offsets.Synchronization.DwellTime = options.RebalanceDwellTime
 	config.Consumer.Fetch.Default = options.FetchDefaultBytes
 	config.Consumer.Return.Errors = true

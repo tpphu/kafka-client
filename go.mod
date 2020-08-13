@@ -10,8 +10,9 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21
 	github.com/eapache/queue v1.1.1-0.20180227141424-093482f3f8ce
 	github.com/facebookgo/clock v0.0.0-20150410010913-600d898af40a
-	github.com/golang/protobuf v1.0.0
+	github.com/golang/protobuf v1.4.2
 	github.com/golang/snappy v0.0.1
+	github.com/onsi/ginkgo v1.14.0 // indirect
 	github.com/pierrec/lz4 v2.4.1+incompatible
 	github.com/pierrec/xxHash v0.0.0-20170714082455-a0006b13c722
 	github.com/pkg/errors v0.9.1 // indirect
