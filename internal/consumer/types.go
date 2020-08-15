@@ -24,7 +24,7 @@ import (
 	"errors"
 
 	"github.com/Shopify/sarama"
-	"github.com/bsm/sarama-cluster"
+	cluster "github.com/bsm/sarama-cluster"
 	"github.com/golang/protobuf/proto"
 	"github.com/uber-go/kafka-client/internal/util"
 	"github.com/uber-go/kafka-client/kafka"
@@ -36,7 +36,7 @@ type (
 	SaramaConsumer interface {
 		Close() error
 		Errors() <-chan error
-		Notifications() <-chan *cluster.Notification
+		// Notifications() <-chan *cluster.Notification
 		Partitions() <-chan cluster.PartitionConsumer
 		CommitOffsets() error
 		Messages() <-chan *sarama.ConsumerMessage

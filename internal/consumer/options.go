@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	"github.com/bsm/sarama-cluster"
+	cluster "github.com/bsm/sarama-cluster"
 )
 
 type (

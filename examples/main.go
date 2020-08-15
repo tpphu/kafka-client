@@ -34,9 +34,11 @@ func main() {
 		"sample_topic_5": []string{"sample_cluster"},
 	}
 
+	logger, _ := zap.NewDevelopment()
+
 	// First create the kafkaclient, its the entry point for creating consumers or producers
 	// It takes as input a name resolver that knows how to map topic names to broker ip addrs
-	client := kafkaclient.New(kafka.NewStaticNameResolver(topicClusterAssignment, brokers), zap.NewNop(), tally.NoopScope)
+	client := kafkaclient.New(kafka.NewStaticNameResolver(topicClusterAssignment, brokers), logger, tally.NoopScope)
 
 	// Next, setup the consumer config for consuming from a set of topics
 	config := &kafka.ConsumerConfig{
