@@ -30,15 +30,16 @@ func main() {
 		"sample_dlq_cluster": []string{"127.0.0.1:9092", "127.0.0.1:9093", "127.0.0.1:9094"},
 	}
 	// mapping from topic name to cluster that has that topic
-	topicClusterAssignment := map[string][]string{
-		"sample_topic_5": []string{"sample_cluster"},
-	}
+	// Khong dc su dung
+	// topicClusterAssignment := map[string][]string{
+	// 	"sample_topic_5": []string{"sample_cluster"},
+	// }
 
 	logger, _ := zap.NewDevelopment()
 
 	// First create the kafkaclient, its the entry point for creating consumers or producers
 	// It takes as input a name resolver that knows how to map topic names to broker ip addrs
-	client := kafkaclient.New(kafka.NewStaticNameResolver(topicClusterAssignment, brokers), logger, tally.NoopScope)
+	client := kafkaclient.New(kafka.NewStaticNameResolver(nil, brokers), logger, tally.NoopScope)
 
 	// Next, setup the consumer config for consuming from a set of topics
 	config := &kafka.ConsumerConfig{
@@ -68,6 +69,7 @@ func main() {
 	config.Offsets.Commits.Enabled = true
 
 	// Create the consumer through the previously created client
+	// 1. Cach tiep can moi bay gio la sua tu day
 	consumer, err := client.NewConsumer(config)
 	if err != nil {
 		panic(err)
@@ -83,6 +85,7 @@ func main() {
 
 	for {
 		select {
+		// 2. Cach tiep can moi bay gio la sua tu day
 		case msg, ok := <-consumer.Messages():
 			if !ok {
 				return // channel closed
